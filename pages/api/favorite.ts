@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { without } from "lodash";
+// import { without } from "lodash";
 
 import prismadb from "@/libs/prismadb";
 import serverAuth from "@/libs/serverAuth";
@@ -24,19 +24,29 @@ export default async function handler(
       }
       // Number(id)
 
-      const updatedUser = await prismadb.user.update({
-        where: { email: currentUser.email || '' },
+      // console.log(currentUser.id)
+      // const userId = currentUser.id
+
+      const CreateFavourateMovie =  await prismadb.favorite.create({
         data: {
-          favorites: {
-            connect: { id: parseInt(movieId, 10) },
-          },
+          userId: currentUser?.id,
+          movieId: Number(movieId),
         },
-        include: { favorites: true },
       });
+
+      // const updatedUser = await prismadb.user.update({
+      //   where: { email: currentUser.email || '' },
+      //   data: {
+      //     favorites: {
+      //       connect: { id: parseInt(movieId, 10) },
+      //     },
+      //   },
+      //   include: { favorites: true },
+      // });
 
   
 
-      return res.status(200).json(updatedUser);
+      return res.status(200).json(CreateFavourateMovie);
     }
 
     if (req.method === "DELETE") {
@@ -55,17 +65,25 @@ export default async function handler(
       }
 
       // const updatedFavoriteIds = without(currentUser.favoriteIds, movieId);
+      // favorite
 
-      const updatedUser = await prismadb.user.update({
+      // const Removefavoritemovie = await prismadb.favorite.delete({
+      //   where: {
+      //     movieId: Number(movieId),
+      //   },
+      // })
+
+      const Removefavoritemovie = await prismadb.favorite.delete({
         where: {
-          email: currentUser.email || "",
-        },
-        data: {
-          favoriteIds: updatedFavoriteIds,
+          userId_movieId: {
+            userId: currentUser.id,
+            movieId: Number(movieId),
+          },
         },
       });
+     
 
-      return res.status(200).json(updatedUser);
+      return res.status(200).json(Removefavoritemovie);
     }
 
     return res.status(405).end();

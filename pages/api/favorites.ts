@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { isEmpty } from "lodash";
+// import { isEmpty } from "lodash";
 import prismadb from '@/libs/prismadb';
 import serverAuth from "@/libs/serverAuth";
 
@@ -14,28 +14,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const favoritedMovies = await prismadb.favorite.findMany({
       where: {
-        // where: { published: true },
-      //  include: { author: true },
-        id: {
-          in: currentUser?.id,
-        }
+        userId: currentUser?.id,
       },
       include: { movie: true },
     });
 
     const movies = favoritedMovies.map(favorite => favorite.movie);
 
-    // const favoritedstatus = favoritedMovies.status
-    const data = {
-      favoritedMovies,
-      movies
-    };
-
-    const responseData = isEmpty(data) ? { error: "No data found" } : data;
-
-    // const movies = favoritedMovies.map(favorite => favorite.movie);
-
-    return res.status(200).json( responseData);
+  
+    return res.status(200).json( movies);
   } catch (error) {
     console.log(error);
     return res.status(500).end();
